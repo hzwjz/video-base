@@ -119,19 +119,19 @@ export default class VideoBase {
 
     updateReactiveState(event) {
         switch(event.type){
-            case _mediaEvent.MEDIA_VIDEO_READY:
+            case _mediaEvent.VIDEO_READY:
                 break;
-            case _mediaEvent.MEDIA_STATE:
+            case _mediaEvent.STATE:
                 this.reactiveState.state = event.data;             
                 break;
-            case _mediaEvent.MEDIA_TIME:
+            case _mediaEvent.TIME:
                 this.reactiveState.currentTime = event.data.currentTime;
                 this.reactiveState.duration = event.data.duration;                
                 break;
-            case _mediaEvent.MEDIA_BUFFER:
+            case _mediaEvent.BUFFER:
                 this.reactiveState.buffered = event.data.bufferPercent;
                 break;
-            case _mediaEvent.MEDIA_ERROR:
+            case _mediaEvent.ERROR:
                 this.reactiveState.error = event.data;
                 break;
             // todo
