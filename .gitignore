@@ -1,0 +1,13 @@
+logs
+*.log
+npm-debug.log
+selenium-debug.log
+npm-debug.log*
+.DS_Store
+.npm
+.editorconfig
+package-lock.json
+test/coverage
+build/
+node_modules
+node_modules/
