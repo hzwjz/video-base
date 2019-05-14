@@ -3,7 +3,7 @@
  */
 import BaseMedia from './baseMedia';
 import _constant from '../constant';
-import _mediaEvent from '../event';
+import {mediaEvent} from '../event';
 import _logUtil from '../util/logUtil';
 import _mediaUtil from '../util/mediaUtil';
 import _domUtil from '../util/domUtil';
@@ -27,13 +27,13 @@ export default class NativeVideoMedia extends BaseMedia{
             var _mimeType = _mediaUtil.getVideoMIMEType(src);
 
             if(!_mimeType){
-                this._doOptionFn(_mediaEvent.MEDIA_ERROR, _constant.ERROR_CODE.MEDIA_ERROR_SOURCETYPE_NOT_SUPPORT);
+                this._doOptionFn(mediaEvent.ERROR, _constant.ERROR_CODE.MEDIA_ERROR_SOURCETYPE_NOT_SUPPORT);
                 return;
             }
 
             // 个别手机检测不可靠
             if (!_mediaUtil.checkVideoCanPlay(_mimeType)) {
-                this._doOptionFn(_mediaEvent.MEDIA_ERROR, _constant.ERROR_CODE.MEDIA_ERROR_SOURCETYPE_NOT_SUPPORT);
+                this._doOptionFn(mediaEvent.ERROR, _constant.ERROR_CODE.MEDIA_ERROR_SOURCETYPE_NOT_SUPPORT);
                 return;
             };
 
@@ -163,7 +163,7 @@ export default class NativeVideoMedia extends BaseMedia{
 
             // 不暂停，交给监听的组件处理
 
-            this._doOptionFn(_mediaEvent.MEDIA_BEFORE_PLAY);
+            this._doOptionFn(mediaEvent.BEFORE_PLAY);
             return;
         }
     }
@@ -186,7 +186,7 @@ export default class NativeVideoMedia extends BaseMedia{
         if(this._cfg.beforePlay && !this._movieData.hasDoBeforePlay && this._state == _constant.MEDIA_STATE.PLAYING){
             this._movieData.hasDoBeforePlay = true;
 
-            this._doOptionFn(_mediaEvent.MEDIA_BEFORE_PLAY);
+            this._doOptionFn(mediaEvent.BEFORE_PLAY);
             return false;
         }
 
@@ -220,7 +220,7 @@ export default class NativeVideoMedia extends BaseMedia{
         this.stop();
 
         // 一般是网络错误，具体错误信息还不知道用哪个属性
-        this._doOptionFn(_mediaEvent.MEDIA_ERROR, {
+        this._doOptionFn(mediaEvent.ERROR, {
             code : _constant.ERROR_CODE.MEDIA_ERROR_SOURCE_ERROR,
             message : this._formatVideoNodeError(e)
         });

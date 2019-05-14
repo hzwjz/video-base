@@ -2,7 +2,7 @@
  * base media class
  */
 import _constant from '../constant';
-import _mediaEvent from '../event';
+import {mediaEvent} from '../event';
 import _logUtil from '../util/logUtil';
 import _mediaUtil from '../util/mediaUtil';
 import _domUtil from '../util/domUtil';
@@ -24,7 +24,7 @@ export default class BaseMedia {
         if(this._mute){
             this._volume = 0;
         }
-        this._rate = this._cfg.rate || 0;
+        this._rate = this._cfg.rate || 1;
         this._hasDoLoad = false;
         this._hasGetMetaData = false;
         this._errorCount = 0;  
@@ -48,14 +48,14 @@ export default class BaseMedia {
         this._initVideoNodeEvent();
 
         // 抛出事件
-        this._doOptionFn(_mediaEvent.MEDIA_VIDEO_READY, this._videoNode || null);
+        this._doOptionFn(mediaEvent.VIDEO_NODE_READY, this._videoNode || null);
     }
 
     _initVideoNode() {
         // 子类实现
 
         if (!_mediaUtil.supportVideo()) {
-            this._doOptionFn(_mediaEvent.MEDIA_ERROR, _constant.ERROR_CODE.MEDIA_ERROR_VIDEOTAG_NOT_SUPPORT);
+            this._doOptionFn(mediaEvent.ERROR, _constant.ERROR_CODE.MEDIA_ERROR_VIDEOTAG_NOT_SUPPORT);
             return;
         };
 
@@ -78,7 +78,7 @@ export default class BaseMedia {
             attrs['x5-video-player-fullscreen'] = 'true';
         }
 
-        if(this._cfg.useNative){ // 直接使用video标签默认的ui
+        if(this._cfg.useNativeUI){ // 直接使用video标签默认的ui
             attrs.controls = 'controls';
         }
 
@@ -96,7 +96,7 @@ export default class BaseMedia {
             _domUtil.addEvent(this._videoNode, "loadstart", function(){
                 // 预加载也会触发loadstart事件，说明预加载时自动调用了load
                 // 开始加载新视频
-                this._doOptionFn(_mediaEvent.MEDIA_START_LOAD, {
+                this._doOptionFn(mediaEvent.START_LOAD, {
                     videoNode : this._videoNode,
                     movieData : this._movieData
                 });
@@ -192,7 +192,7 @@ export default class BaseMedia {
         } 
 
         // 发送当前清晰度事件
-        this._doOptionFn(_mediaEvent.MEDIA_QUALITY_CHANGE, this._item);
+        // this._doOptionFn(mediaEvent.QUALITY_CHANGE, this._item);
 
         // 设置音量
         this.volume(this._volume);
@@ -226,7 +226,7 @@ export default class BaseMedia {
         if(this._cfg.beforeLoad && !this._movieData.hasDoBeforeLoad){
             this._movieData.hasDoBeforeLoad = true;
 
-            this._doOptionFn(_mediaEvent.MEDIA_BEFORE_LOAD);
+            this._doOptionFn(mediaEvent.BEFORE_LOAD);
         }
     }
 
@@ -298,7 +298,7 @@ export default class BaseMedia {
             
             this._catchPlay(); // 拖动后就播放
 
-            this._doOptionFn(_mediaEvent.MEDIA_SEEK, {
+            this._doOptionFn(mediaEvent.SEEK, {
                 oldData : old,
                 newData : position
             });
@@ -314,7 +314,7 @@ export default class BaseMedia {
                 _p = 0;
             }
 
-            this._doOptionFn(_mediaEvent.MEDIA_SEEK_FORWARD, {
+            this._doOptionFn(mediaEvent.SEEK_FORWARD, {
                 oldData : {
                     position : this._position,
                     duration : this._duration
@@ -334,7 +334,7 @@ export default class BaseMedia {
         if(this._canSeek()){
             var _p = this._position - _constant.VARCONST.SEEK_STEP < 0 ? 0 : this._position - _constant.VARCONST.SEEK_STEP;
         
-            this._doOptionFn(_mediaEvent.MEDIA_SEEK_BACKWARD, {
+            this._doOptionFn(mediaEvent.SEEK_BACKWARD, {
                 oldData : {
                     position : this._position,
                     duration : this._duration
@@ -362,7 +362,7 @@ export default class BaseMedia {
             this.mute(false);
         }
 
-        this._doOptionFn(_mediaEvent.MEDIA_VOLUME, value);
+        this._doOptionFn(mediaEvent.VOLUME, value);
     }
 
     // 音量递增
@@ -374,7 +374,7 @@ export default class BaseMedia {
         this._videoNode.volume = _val;
         this._volume = _val;
 
-        this._doOptionFn(_mediaEvent.MEDIA_VOLUME_INCREASE, _val);
+        this._doOptionFn(mediaEvent.VOLUME_INCREASE, _val);
     }
 
     // 音量递减
@@ -386,14 +386,14 @@ export default class BaseMedia {
         this._videoNode.volume = _val;
         this._volume = _val;
 
-        this._doOptionFn(_mediaEvent.MEDIA_VOLUME_DECREASE, _val);
+        this._doOptionFn(mediaEvent.VOLUME_DECREASE, _val);
     }
 
     mute(muted){
         this._videoNode.muted = muted;
         this._mute = muted;
 
-        this._doOptionFn(_mediaEvent.MEDIA_MUTE, muted);
+        this._doOptionFn(mediaEvent.MUTE, muted);
     }
 
     stop() {
@@ -405,7 +405,7 @@ export default class BaseMedia {
         this._setState(_constant.MEDIA_STATE.IDLE);
     }
     
-    state(){
+    getState(){
         return this._state;
     }
 
@@ -430,7 +430,7 @@ export default class BaseMedia {
         this._rate = value;
 
         // 倍速事件
-        this._doOptionFn(_mediaEvent.MEDIA_RATE_CHANGE, value);
+        this._doOptionFn(mediaEvent.RATE_CHANGE, value);
     }
 
     // 检测是否卡顿，与视频云逻辑保持一致
@@ -507,7 +507,7 @@ export default class BaseMedia {
     _setState(newState) {
         if(this._state != newState){
             // 发出事件
-            this._doOptionFn(_mediaEvent.MEDIA_STATE, {
+            this._doOptionFn(mediaEvent.STATE, {
                 newState : newState,
                 oldState : this._state
             });
@@ -575,7 +575,7 @@ export default class BaseMedia {
         }
 
         // 触发meta事件
-        this._doOptionFn(_mediaEvent.MEDIA_META, data);
+        this._doOptionFn(mediaEvent.META, data);
     }
 
     // 播放进度
@@ -593,7 +593,7 @@ export default class BaseMedia {
 
         this._position = data.currentTime;
 
-        this._doOptionFn(_mediaEvent.MEDIA_TIME, data);
+        this._doOptionFn(mediaEvent.TIME, data);
         
         if(this._state != _constant.MEDIA_STATE.PAUSE && this._state != _constant.MEDIA_STATE.PLAYING){
             this._setState(_constant.MEDIA_STATE.PLAYING);
@@ -602,7 +602,7 @@ export default class BaseMedia {
 
     // 加载进度
     _onvideoProgress(e) {
-        this._doOptionFn(_mediaEvent.MEDIA_BUFFER, {
+        this._doOptionFn(mediaEvent.BUFFER, {
             bufferPercent : this._getBufferedPercent()
         });
     }
@@ -694,7 +694,7 @@ export default class BaseMedia {
 
         this.stop();
 
-        this._doOptionFn(_mediaEvent.MEDIA_ERROR, {
+        this._doOptionFn(mediaEvent.ERROR, {
             code : _constant.ERROR_CODE.MEDIA_ERROR_VIDEO_ERROR,
             message : this._formatVideoNodeError(e)
         });

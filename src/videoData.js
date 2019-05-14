@@ -1,16 +1,19 @@
 /**
  * video data
  */
-import _constant from '../constant';
+import _constant from './constant';
+import {videoDataEvent} from './event';
 
 export default class VideoData {
-    constructor(videoData, config) {
+    constructor(videoData, config, options) {
         if(!videoData){
             throw new Error('no video data');
         }
 
         this._config = config;
         this.defaultQuality = this._config.defaultQuality || _constant.VIDEO_QUALITY.SD;
+
+        this._options = options;
 
         if(!videoData.lines){
             this._createMovieItem(videoData.ratios || [videoData]);
@@ -21,6 +24,13 @@ export default class VideoData {
         
         // 将原始数据带上，可能自定义组件中会用到
         this.originVideoData = videoData;
+    }
+
+    _doOptionFn(fn, val) {
+        this._options[fn] && this._options[fn]({
+            type : fn,
+            data : val
+        });
     }
 
     _createLines(videoData) {
@@ -93,6 +103,9 @@ export default class VideoData {
 
         this.currentMovieItem = this.currentMovieItem || this.movieItemList[0]; // 默认第一个
         this.currentQuality = this.currentMovieItem.quality;
+        this.qualityCount = this.movieItemList.length;
+
+        this._doOptionFn(videoDataEvent.VIDEO_DATA_READY, this);
     }
 
     _getQualityName(quality) {
@@ -119,6 +132,8 @@ export default class VideoData {
                 break;
             }
         };
+
+        this._doOptionFn(videoDataEvent.QUALITY_CHANGE, this);
     }
 
     changeLine(line) {     
@@ -136,6 +151,10 @@ export default class VideoData {
             
             // 更新视频数据项
             this._createMovieItem(this.currentLine.ratios);
+
+            // 清晰度切换完成后再抛出
+            this._doOptionFn(videoDataEvent.LINE_CHANGE, this);
+
         }
     }
 }
