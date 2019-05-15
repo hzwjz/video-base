@@ -61,7 +61,7 @@ export default class BaseMedia {
 
         if (!!this._videoNode) return;
 
-        var attrs = {};
+        let attrs = {};
 
         if(this._cfg.autoStart){
             attrs.autoplay = '';
@@ -143,18 +143,6 @@ export default class BaseMedia {
         return this._videoNode || null;
     }
 
-    // 全屏video
-    fullscreenVideo() {
-        if(this.canFullscreenVideo()){
-            this._videoNode.webkitEnterFullscreen();  
-        }
-    }
-
-    // 是否可以全屏video
-    canFullscreenVideo() {
-        return this._videoNode && _baseUtil.isFunction(this._videoNode.webkitEnterFullscreen);
-    }
-
     // 设置movieData
     setMovieData(movieData){
         this._movieData = movieData;
@@ -231,7 +219,7 @@ export default class BaseMedia {
     }
 
     _catchPlay() {
-        var playPromise = this._videoNode.play(), that = this; // ios中必须调用一次，否则无法自动开始播放
+        let playPromise = this._videoNode.play(), that = this; // ios中必须调用一次，否则无法自动开始播放
 
         // catch解决了 The play() request was interrupted 的问题
         if(playPromise && playPromise.catch){
@@ -286,13 +274,13 @@ export default class BaseMedia {
         if(this._canSeek()){
             _logUtil.log('_canSeek');
 
-            var position = _baseUtil.isNumber(_data) ? _data : _data.newData;
+            let position = _baseUtil.isNumber(_data) ? _data : _data.newData;
 
             position = (!position || position < 0) ? 0 : position;
 
             position = position > this._duration ? 0 : position; // 超出就归零
 
-            var old = this._position; 
+            let old = this._position; 
 
             this._seek(position);
             
@@ -308,7 +296,7 @@ export default class BaseMedia {
     seekForward() {
         _logUtil.log('seekForward');
         if(this._canSeek()){
-            var _p = this._position + _constant.VARCONST.SEEK_STEP > this._duration ? this._duration : this._position + _constant.VARCONST.SEEK_STEP;
+            let _p = this._position + _constant.VARCONST.SEEK_STEP > this._duration ? this._duration : this._position + _constant.VARCONST.SEEK_STEP;
 
             if (this.isCompleted()) {
                 _p = 0;
@@ -332,7 +320,7 @@ export default class BaseMedia {
     seekBackward() {
         _logUtil.log('seekBackward');
         if(this._canSeek()){
-            var _p = this._position - _constant.VARCONST.SEEK_STEP < 0 ? 0 : this._position - _constant.VARCONST.SEEK_STEP;
+            let _p = this._position - _constant.VARCONST.SEEK_STEP < 0 ? 0 : this._position - _constant.VARCONST.SEEK_STEP;
         
             this._doOptionFn(mediaEvent.SEEK_BACKWARD, {
                 oldData : {
@@ -367,7 +355,7 @@ export default class BaseMedia {
 
     // 音量递增
     volumeIncrease() {
-        var _val = this._videoNode.volume;
+        let _val = this._videoNode.volume;
 
         _val = (_val + _constant.VARCONST.VOLUME_STEP) > 1 ? 1 : (_val + _constant.VARCONST.VOLUME_STEP);
 
@@ -379,7 +367,7 @@ export default class BaseMedia {
 
     // 音量递减
     volumeDecrease() {
-        var _val = this._videoNode.volume;
+        let _val = this._videoNode.volume;
 
         _val = (_val - _constant.VARCONST.VOLUME_STEP) < 0 ? 0 : (_val - _constant.VARCONST.VOLUME_STEP);
 
@@ -437,7 +425,7 @@ export default class BaseMedia {
     isBlock() {
         this._isbLastFrameCount = this._isbLastFrameCount || 0;
 
-        var calcFrame;
+        let calcFrame;
 
         if (this._videoNode.webkitDecodedFrameCount) {
             this._isbNowFrameCount = this._videoNode.webkitDecodedFrameCount;
@@ -464,7 +452,7 @@ export default class BaseMedia {
     currentFPS() {
         this._cfpsLastFrameCount = this._cfpsLastFrameCount || 0;
 
-        var calcFrame = 0;
+        let calcFrame = 0;
 
         if (this._videoNode.webkitDecodedFrameCount) {
             this._cfpsNowFrameCount = this._videoNode.webkitDecodedFrameCount;
@@ -485,7 +473,7 @@ export default class BaseMedia {
     currentKbps() {
         this._cfpslastByteLoaded = this._cfpslastByteLoaded || 0;
 
-        var calcByte = 0;
+        let calcByte = 0;
 
         if (this._videoNode.webkitVideoDecodedByteCount) {
             this._cfpsNowByteLoaded = this._videoNode.webkitVideoDecodedByteCount;
@@ -543,7 +531,7 @@ export default class BaseMedia {
             return;
         }
 
-        var c = 0;
+        let c = 0;
         this._checkMetaTimer = setInterval(function(){
             c++;
 
@@ -568,7 +556,7 @@ export default class BaseMedia {
     _doMetaReady() {
         this._hasGetMetaData = true;
 
-        var data = {
+        let data = {
             duration : Math.floor(this._duration),
             width: this._videoNode.videoWidth,
             height: this._videoNode.videoHeight
@@ -580,12 +568,14 @@ export default class BaseMedia {
 
     // 播放进度
     _onvideoTimeupdate(e) {
+        if(!this._videoNode) return;
+
         // 时长校准
         if (this._videoNode.duration && isFinite(this._videoNode.duration)) { 
             this._duration  = this._videoNode.duration;
         }
 
-        var data = {
+        let data = {
             currentTime : Math.floor(this._videoNode.currentTime),
             // currentTime : this._videoNode.currentTime, // 可能有些影响
             duration : Math.floor(this._videoNode.duration)
@@ -608,17 +598,17 @@ export default class BaseMedia {
     }
 
     _getBufferedPercent() {        
-        var buffered = this._videoNode.buffered, end = 0;
-        var ba, be;
+        let buffered = this._videoNode.buffered, end = 0;
+        let ba, be;
 
         if (!buffered || buffered.length < 1) {
             return 0;
         }else if (buffered && buffered.length == 1) {
             end = Math.floor(buffered.end(0));
         }else{
-            var _p = this._videoNode.currentTime || 0;
+            let _p = this._videoNode.currentTime || 0;
 
-            for(var i = 0, l = buffered.length; i < l ;i++){
+            for(let i = 0, l = buffered.length; i < l ;i++){
                 ba = Math.floor(buffered.start(i));
                 be = Math.floor(buffered.end(i));
 

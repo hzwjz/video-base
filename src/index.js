@@ -11,6 +11,7 @@ import logUtil from './util/logUtil';
 import mediaUtil from './util/mediaUtil';
 import domUtil from './util/domUtil';
 import baseUtil from './util/baseUtil';
+import FullscreenHelper from './util/fullscreenHelper';
 import Constant from './constant';
 import defaultConfig from './defaultConfig';
 
@@ -113,7 +114,12 @@ export default class VideoBase {
             this.updateReactiveState(event);
         }
 
-        this._emitter.emit(event.type, event.data);
+        try{
+            this._emitter.emit(event.type, event.data);
+        }catch(err){
+            console.error('Unhandled video-base error');
+        }
+        
     }
 
     destroy(){
@@ -162,7 +168,11 @@ export default class VideoBase {
             this.updateReactiveState(event);
         }
 
-        this._emitter.emit(event.type, event.data);
+        try{
+            this._emitter.emit(event.type, event.data);
+        }catch(err){
+            console.error('Unhandled video-base error');
+        }
     }
 
     getReactiveState() {
@@ -241,6 +251,9 @@ export default class VideoBase {
             case mediaEvent.MUTE:
                 this.reactiveState.mute = event.data.mute;
                 break;
+            case mediaEvent.FULLSCREEN:
+                this.reactiveState.fullscreen = event.data;
+                break;
         }
     }
 
@@ -270,6 +283,23 @@ export default class VideoBase {
         this._videoData && this._videoData.changeLine(line);
 
         this.reload();
+    }
+
+    fullscreen(rootNode) {
+        if(!this.fullscreenHelper){
+            this.fullscreenHelper = new FullscreenHelper((isFullscreen) => {
+                this.updateReactiveState({
+                    type: mediaEvent.FULLSCREEN,
+                    data: isFullscreen
+                });
+            });
+        }
+
+        this.fullscreenHelper.enterfullScreen(rootNode);
+    }
+
+    existFullscreen() {
+        this.fullscreenHelper && this.fullscreenHelper.existfullScreen();
     }
 };
 

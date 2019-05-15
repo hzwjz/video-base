@@ -2,10 +2,10 @@
  * dom util
  */
 function createEl(tagName, attrs) {
-    var el = document.createElement(tagName || 'div');
+    let el = document.createElement(tagName || 'div');
 
     if (attrs && el.setAttribute) {
-        for (var p in attrs) {
+        for (let p in attrs) {
             if (Object.prototype.hasOwnProperty.call(attrs, p)) {
                 el.setAttribute(p, attrs[p]);
             }
@@ -26,6 +26,26 @@ function addEvent(ele, evtName, fn) {
 
 function clearEvent(ele, evtName, fn) {
     ele.removeEventListener(evtName, fn);
+}
+
+function getEvent() {
+    if (document.all) return window.event;
+
+    var func = getEvent.caller;
+
+    while (func != null) {
+        var arg0 = func.arguments[0];
+
+        if (arg0) {
+            if ((arg0.constructor == Event || arg0.constructor == MouseEvent) || (typeof(arg0) == "object" && arg0.preventDefault && arg0.stopPropagation)) {
+                return arg0;
+            }
+        }
+
+        func = func.caller;
+    }
+
+    return null;
 }
 
 function setStyle(ele, styleName, value) {
@@ -69,5 +89,6 @@ export default {
     delClassName,
     attr,
     addEvent,
-    clearEvent
+    clearEvent,
+    getEvent
 }

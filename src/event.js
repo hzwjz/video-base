@@ -25,5 +25,6 @@ export const mediaEvent = {
     MUTE : 'mute',
     SEEK : 'seek',
     SEEK_FORWARD : 'seekForward',
-    SEEK_BACKWARD : 'seekBackward'
+    SEEK_BACKWARD : 'seekBackward',
+    FULLSCREEN: 'fullscreen'
 };

@@ -5,6 +5,11 @@ function log(text) {
 
 }
 
+function error(text) {
+
+}
+
 export default {
-    log
+    log,
+    error
 }
