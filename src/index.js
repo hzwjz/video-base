@@ -4,7 +4,9 @@
 import EventEmitter from 'events';
 import VideoData from './videoData';
 import {mediaEvent, videoDataEvent} from './event';
-import html5VideoMedia from './media/nativeVideoMedia'; // test
+import NativeVideoMedia from './media/nativeVideoMedia'; // test
+import FlvVideoMedia from './media/flvVideoMedia'; // test
+import HlsVideoMedia from './media/hlsVideoMedia'; // test
 import formatUtil from './util/formatUtil';
 import envUtil from './util/envUtil';
 import logUtil from './util/logUtil';
@@ -99,15 +101,47 @@ export default class VideoBase {
     }
 
     _createMediaIns(callback) {
-        let _options = {};
+        let insOptions = {}, ins = null, ft = this._videoData.currentMovieItem.fileType;
 
         Object.keys(mediaEvent).forEach((key) => {
-            _options[mediaEvent[key]] = this._mediaEventHandler.bind(this);
+            insOptions[mediaEvent[key]] = this._mediaEventHandler.bind(this);
         });
 
-        // _mediaSwitch(this._parentNode, this._videoData, this._config, _options, callback);
-        callback && callback(new html5VideoMedia(this._parentNode, this._config, _options)); // test
-    }   
+        if(ft == 'mp4'){
+            ins = new NativeVideoMedia(this._parentNode, this._config, insOptions);
+        }else if(ft == 'hls'){ // m3u8
+            if(mediaUtil.checkVideoCanPlay(constant.VIDEO_SOURSE_MIME_TYPE.m3u8)){ // 浏览器检测不准确
+                ins = new NativeVideoMedia(this._parentNode, this._config, insOptions);
+            }else{
+                /*global Hls*/
+                if(!window.Hls){
+                    // 加载hls.js
+                    domUtil.loadScript(this._config.hlsjs.libUrl, () => {
+                        ins = new HlsVideoMedia(this._parentNode, this._config, insOptions);
+                        callback && callback(ins);
+                    });
+                    return;
+                }else{
+                    ins = new HlsVideoMedia(this._parentNode, this._config, insOptions);
+                }
+            }
+        }else if(ft == 'flv'){ // flv
+            if(!window.flvjs){
+                // 加载flvjs
+                domUtil.loadScript(this._config.flvjs.libUrl, () => {
+                    ins = new FlvVideoMedia(this._parentNode, this._config, insOptions);
+                    callback && callback(ins);
+                });
+                return;
+            }else{
+                ins = new FlvVideoMedia(this._parentNode, this._config, insOptions);
+            }
+        }
+
+        if(ins){
+            callback && callback(ins);
+        }
+    }
 
     _mediaEventHandler(event) {
         if(this.reactiveState){
@@ -117,9 +151,9 @@ export default class VideoBase {
         try{
             this._emitter.emit(event.type, event.data);
         }catch(err){
+            // 如果没有注册error事件处理方法，则抛出异常
             console.error('Unhandled video-base error');
         }
-        
     }
 
     destroy(){
@@ -171,6 +205,7 @@ export default class VideoBase {
         try{
             this._emitter.emit(event.type, event.data);
         }catch(err){
+            // 如果没有注册error事件处理方法，则抛出异常
             console.error('Unhandled video-base error');
         }
     }

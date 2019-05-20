@@ -81,6 +81,39 @@ function attr(ele, attr, value) {
     ele.setAttribute(attr, value);
 }
 
+function loadScript(url, callback) {
+    let tag = createEl('script'), tout = 30;
+
+    function onload() {
+        callback && callback(null);
+    }
+
+    function onerror(err) {
+        callback && callback({
+            message : err
+        });
+    }
+
+    addEvent(tag, 'load', () => {
+        onload();
+    });
+
+    addEvent(tag, 'error', (e) => {
+        onerror({
+            message: `load ${url} fail: ${e.message}`
+        });
+    });
+
+    window.setTimeout(() => {
+        onerror({
+            message: `load ${url} timeout`
+        });
+    }, tout);
+
+    tag.src = url;
+    document.head.appendChild(tag);
+}
+
 export default {
     createEl,
     getByTagName,
@@ -90,5 +123,6 @@ export default {
     attr,
     addEvent,
     clearEvent,
-    getEvent
+    getEvent,
+    loadScript
 }
