@@ -1,15 +1,11 @@
 # Video Base
 
-html5 video基础功能库，提供了简单的API和统一的事件，可在此基础之上构建具有复杂功能的视频播放组件。
+the video-base is a html5 video lib, you can use it to build video player  ui component.
 
-可支持mp4、flv、m3u8格式的视频播放。内部封装了flvjs和hlsjs，你无需自己了解这些库的使用细节。
+## how to use
 
-**暂时不提供flash播放功能**。
-
-## 如何使用
-
-## 一些概念
+sorry, you can't use it with npm install now because it has not been published to npm...
 
 ## API
 
-## 常见问题
+## FAQ
