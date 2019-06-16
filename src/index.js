@@ -290,13 +290,13 @@ export default class VideoBase {
                 this.reactiveState.error = event.data;
                 break;
             case mediaEvent.RATE_CHANGE:
-                this.reactiveState.rate = event.data.rate;
+                this.reactiveState.rate = event.data;
                 break;
             case mediaEvent.VOLUME:
-                this.reactiveState.volume = event.data.volume;
+                this.reactiveState.volume = event.data;
                 break;
             case mediaEvent.MUTE:
-                this.reactiveState.mute = event.data.mute;
+                this.reactiveState.mute = event.data;
                 break;
             case mediaEvent.FULLSCREEN:
                 this.reactiveState.fullscreen = event.data;
