@@ -5,6 +5,16 @@ import _constant from './constant';
 import {videoDataEvent} from './event';
 
 export default class VideoData {
+    /**
+     * VideoData Class
+     * @param {Object} videoData 
+     * @param {String} [videoData.posterUrl]
+     * @param {Number} [videoData.start=0]
+     * @param {Number} [videoData.duration]
+     * @param {Array}  [videoData.lines]
+     * @param {*} config 
+     * @param {*} options 
+     */
     constructor(videoData, config, options) {
         if(!videoData){
             throw new Error('no video data');
@@ -15,6 +25,12 @@ export default class VideoData {
 
         this._options = options;
 
+        // other data
+        this.id = 'video-base-id-' + new Date().getTime();
+        this.posterUrl = videoData.posterUrl;
+        this.start = videoData.start;
+        this.duration = videoData.duration;
+
         if(!videoData.lines){
             this._createMovieItem(videoData.ratios || [videoData]);
         }else{
@@ -22,7 +38,7 @@ export default class VideoData {
             this._createLines(videoData);
         }
         
-        // 将原始数据带上，可能自定义组件中会用到
+        // 将原始数据带上，todo custom data
         this.originVideoData = videoData;
     }
 
@@ -51,7 +67,7 @@ export default class VideoData {
 
                 this.lines.push(nl);
 
-                if(_data.lineSwitch && _data.lineSwitch == line.type){
+                if(videoData.lineSwitch && videoData.lineSwitch == line.type){
                     this.currentLine = nl;
                 }
             }
@@ -102,6 +118,12 @@ export default class VideoData {
         };
 
         this.currentMovieItem = this.currentMovieItem || this.movieItemList[0]; // 默认第一个
+
+        if(!this.currentMovieItem){
+            this._doOptionFn(videoDataEvent.ERROR, _constant.ERROR_CODE.VIDEO_DATA_ERROR_NO_URL);
+            return;
+        }
+
         this.currentQuality = this.currentMovieItem.quality;
         this.qualityCount = this.movieItemList.length;
 
@@ -114,7 +136,7 @@ export default class VideoData {
 
     _getMediaType(video) {
         if(video.format){
-            return video.format
+            return video.format;
         }
 
         return _mediaUtil.getMediaType(video.videoUrl);
@@ -126,7 +148,7 @@ export default class VideoData {
         };
 
         for (var i = 0; i < this.movieItemList.length; i++) {
-            if(this.movieItemList[i].quality == _data.newData.quality){
+            if(this.movieItemList[i].quality == quality){
                 this.currentMovieItem = this.movieItemList[i];
                 this.currentQuality = quality; // 更新当前清晰度选择
                 break;

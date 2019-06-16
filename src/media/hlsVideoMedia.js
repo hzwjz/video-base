@@ -87,7 +87,7 @@ export default class HlsVideoMedia extends BaseMedia {
         }
     }
 
-    _doPreloadPause = function(){
+    _doPreloadPause(){
         if(this._cfg.isPreload && !this._hasDoPreload){
             this._hasDoPreload = true;
             this.pause(); // 主动暂停

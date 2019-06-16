@@ -26,8 +26,28 @@ function makeArray(nodes) {
     return array;
 }
 
+function throttle(func, delay) {
+    let timer = null;
+
+    return function(...arg) {
+        if(timer){
+            clearTimeout(timer);
+            timer = null;
+
+            timer = setTimeout(() => {
+                func && func(...arg);
+            }, delay);
+        }else{
+            timer = setTimeout(() => {
+                func && func(...arg);
+            }, delay);
+        }
+    }
+}
+
 export default {
     isFunction,
     isNumber,
-    makeArray
+    makeArray,
+    throttle
 }

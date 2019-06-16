@@ -2,9 +2,11 @@
  * event
  */
 export const videoDataEvent = {
+    CONFIG_READY: 'configReady',
     VIDEO_DATA_READY : 'videoDataReady',
-    LINE_CHANGE : 'line_change',
-    QUALITY_CHANGE : 'qualityChange'
+    LINE_CHANGE : 'lineChange',
+    QUALITY_CHANGE : 'qualityChange',
+    ERROR: 'dataError'
 };
     
 export const mediaEvent = {
@@ -18,7 +20,7 @@ export const mediaEvent = {
     BUFFER : 'buffer',
     BUFFER_FULL : 'bufferFull',
     TIME : 'time',
-    ERROR : 'error',
+    ERROR : 'mediaError',
     VOLUME : 'volume',
     VOLUME_INCREASE : 'volumeIncrease',
     VOLUME_DECREASE : 'volumeDecrease',

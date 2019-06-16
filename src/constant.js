@@ -34,7 +34,7 @@ export default {
     // 错误码
     ERROR_CODE : {
         'VIDEO_DATA_ERROR_NO_URL': 3, // 缺少视频地址
-        'VIDEO_DATA_ERROR_ENCRYPT': 4, // 无法播放加密视频
+        // 'VIDEO_DATA_ERROR_ENCRYPT': 4, // 无法播放加密视频
         'MEDIA_ERROR_VIDEOTAG_NOT_SUPPORT': 5, // video标签不支持
         'MEDIA_ERROR_SOURCETYPE_NOT_SUPPORT': 6, // 视频文件不支持
         'MEDIA_ERROR_SOURCE_ERROR': 7, // 视频源错误，一般是网络问题或者是地址错误
@@ -47,7 +47,7 @@ export default {
     // 错误文案
     ERROR_TXT : {
         '3': '缺少视频地址',
-        '4': '不支持该视频播放',
+        // '4': '不支持该视频播放',
         '5': '您的浏览器不支持视频播放',
         '6': '不支持该视频播放',
         '7': '抱歉视频无法播放',

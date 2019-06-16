@@ -4,9 +4,9 @@
 import EventEmitter from 'events';
 import VideoData from './videoData';
 import {mediaEvent, videoDataEvent} from './event';
-import NativeVideoMedia from './media/nativeVideoMedia'; // test
-import FlvVideoMedia from './media/flvVideoMedia'; // test
-import HlsVideoMedia from './media/hlsVideoMedia'; // test
+import NativeVideoMedia from './media/nativeVideoMedia'; 
+import FlvVideoMedia from './media/flvVideoMedia'; 
+import HlsVideoMedia from './media/hlsVideoMedia';
 import formatUtil from './util/formatUtil';
 import envUtil from './util/envUtil';
 import logUtil from './util/logUtil';
@@ -29,12 +29,23 @@ export default class VideoBase {
             this._parentNode = options.parent;
         }
 
+        if(options.root){
+            this._rootNode = options.root;
+        }
+
         this._emitter = new EventEmitter();
 
+        // inited state
         this.getReactiveState();
 
         this._invokeConfig(options.config, c => {
             this._config = c;
+
+            // config event
+            this._eventHandler({
+                type: videoDataEvent.CONFIG_READY,
+                data: this._config
+            });
 
             // video data
             if(options.videoData){
@@ -104,7 +115,7 @@ export default class VideoBase {
         let insOptions = {}, ins = null, ft = this._videoData.currentMovieItem.fileType;
 
         Object.keys(mediaEvent).forEach((key) => {
-            insOptions[mediaEvent[key]] = this._mediaEventHandler.bind(this);
+            insOptions[mediaEvent[key]] = this._eventHandler.bind(this);
         });
 
         if(ft == 'mp4'){
@@ -143,13 +154,18 @@ export default class VideoBase {
         }
     }
 
-    _mediaEventHandler(event) {
+    _eventHandler(event) {
         if(this.reactiveState){
             this.updateReactiveState(event);
         }
 
         try{
             this._emitter.emit(event.type, event.data);
+            console.log('event.type:'+event.type);
+            this._emitter.emit('event', {
+                type: event.type,
+                data: event.data
+            });
         }catch(err){
             // 如果没有注册error事件处理方法，则抛出异常
             console.error('Unhandled video-base error');
@@ -190,29 +206,16 @@ export default class VideoBase {
         // invoke video data
         let _options = {};
         Object.keys(videoDataEvent).forEach((key) => {
-            _options[videoDataEvent[key]] = this._videoDataEventHandler.bind(this);
+            _options[videoDataEvent[key]] = this._eventHandler.bind(this);
         });
-        let nvd = new VideoData(data, this._config, _options);
-
-        this._videoDataReady(nvd);
-    }
-
-    _videoDataEventHandler(event) {
-        if(this.reactiveState){
-            this.updateReactiveState(event);
-        }
-
-        try{
-            this._emitter.emit(event.type, event.data);
-        }catch(err){
-            // 如果没有注册error事件处理方法，则抛出异常
-            console.error('Unhandled video-base error');
-        }
+        
+        new VideoData(data, this._config, _options);
     }
 
     getReactiveState() {
         if(!this.reactiveState){
             this.reactiveState = {
+                config: null,
                 videoData: null,
                 error: null,
                 line: null,
@@ -236,6 +239,9 @@ export default class VideoBase {
 
     updateReactiveState(event) {
         switch(event.type){
+            case videoDataEvent.CONFIG_READY:
+                this.reactiveState.config = event.data;
+                break;
             case videoDataEvent.VIDEO_DATA_READY:
                 this.reactiveState.videoData = event.data;
 
@@ -250,8 +256,10 @@ export default class VideoBase {
                 }
 
                 this.reactiveState.qualityCount = event.data.qualityCount;
-                
+
+                this._videoDataReady(event.data); // data ready
                 break;
+
             case videoDataEvent.LINE_CHANGE:
                 this.reactiveState.line = event.data.currentLine.type;
                 this.reactiveState.lineName = event.data.currentLine.name;
@@ -259,6 +267,10 @@ export default class VideoBase {
             case videoDataEvent.QUALITY_CHANGE:
                 this.reactiveState.quality = event.data.quality;
                 this.reactiveState.qualityName = event.data.qualityName;
+                break;
+
+            case videoDataEvent.ERROR:
+                this.reactiveState.error = event.data;
                 break;
 
             case mediaEvent.STATE:
@@ -321,6 +333,8 @@ export default class VideoBase {
     }
 
     fullscreen(rootNode) {
+        rootNode = rootNode || this._rootNode;
+
         if(!this.fullscreenHelper){
             this.fullscreenHelper = new FullscreenHelper((isFullscreen) => {
                 this.updateReactiveState({
@@ -371,6 +385,7 @@ mixinVideoAPI(VideoBase);
 
 // util api
 export const util = {
+    baseUtil,
     formatUtil,
     envUtil,
     logUtil,
